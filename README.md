@@ -46,10 +46,11 @@ Ikuti langkah-langkah berikut:
 ```
 Catatan: Ganti teks "FILL your client id..." dengan Client ID asli milik Anda yang didapatkan dari Google Cloud Console (biasanya berakhiran .apps.googleusercontent.com). File ini sudah diatur agar diabaikan oleh .gitignore sehingga aman dan tidak akan terpublikasi ke GitHub.
 
-## Struktur Folder Seharusnya:
+### Struktur Folder Seharusnya:
 
-📂 Platescape_POS/
- ┣ 📂 data/
+```text
+📦 Platescape_POS
+ ┣ 📂 data
  ┃ ┗ 📜 client_id.json    <-- (File Wajib Anda Buat!)
  ┣ 📜 index.html
  ┣ 📜 style.css
@@ -57,7 +58,7 @@ Catatan: Ganti teks "FILL your client id..." dengan Client ID asli milik Anda ya
  ┣ 📜 404.html
  ┣ 📜 README.md
  ┗ 📜 .gitignore
-
+```
 
 ## 💻 Cara Menjalankan Aplikasi di Komputer Lokal
 Karena aplikasi ini menggunakan fungsi fetch() untuk membaca file client_id.json lokal, Anda tidak bisa membukanya hanya dengan klik ganda (double click) pada file index.html.
