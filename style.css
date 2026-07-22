@@ -1,0 +1,223 @@
+:root {
+    --c-dark-green: #677E61;
+    --c-light-green: #73976A;
+    --c-beige: #F1DEC4;
+    --c-red: #BD4444;
+    --bg-main: #f8f9fa;
+}
+
+body { font-family: 'Poppins', sans-serif; background-color: var(--bg-main); height: 100vh; overflow: hidden; color: #333; }
+
+.text-primary-dark { color: var(--c-dark-green) !important; }
+.text-accent { color: var(--c-red) !important; }
+.bg-primary-dark { background-color: var(--c-dark-green) !important; color: white; }
+.bg-beige { background-color: var(--c-beige) !important; color: #333; }
+.btn-custom { background-color: var(--c-dark-green); color: white; border: none; }
+.btn-custom:hover { background-color: var(--c-light-green); color: white; }
+
+.app-container { display: flex; height: 100vh; width: 100vw; }
+
+.sidebar { width: 250px; background-color: var(--c-dark-green); color: white; display: flex; flex-direction: column; transition: all 0.3s ease; z-index: 1000; }
+.sidebar .brand { padding: 30px 20px; font-size: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.nav-item { padding: 15px 20px; cursor: pointer; display: flex; align-items: center; gap: 15px; opacity: 0.8; transition: 0.2s; border-radius: 0 30px 30px 0; margin-right: 20px; margin-bottom: 5px; }
+.nav-item:hover, .nav-item.active { opacity: 1; background-color: rgba(255,255,255,0.1); }
+.nav-item.active { background-color: var(--c-light-green); font-weight: 500; }
+
+.main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow: hidden; }
+.topbar { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+.search-bar { background: #f0f2f5; border-radius: 20px; padding: 10px 20px; width: 400px; display: flex; align-items: center; gap: 10px; }
+.search-bar input { border: none; background: transparent; outline: none; width: 100%; }
+
+.content-scroll { flex: 1; overflow-y: auto; padding: 30px; padding-bottom: 100px;}
+
+.category-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; }
+.category-scroll::-webkit-scrollbar { height: 6px; }
+.category-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+.category-card { background: white; border-radius: 15px; padding: 15px; min-width: 100px; text-align: center; cursor: pointer; border: 1px solid #eee; transition: 0.3s; }
+.category-card i { font-size: 24px; margin-bottom: 8px; color: var(--c-dark-green); }
+.category-card:hover { border-color: var(--c-light-green); }
+.category-card.active { background: var(--c-dark-green); color: white; border-color: var(--c-dark-green); }
+.category-card.active i { color: white; }
+
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.product-card { background: white; border-radius: 15px; padding: 15px; position: relative; border: 1px solid #f0f0f0; transition: transform 0.2s; display: flex; flex-direction: column;}
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.product-img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; background: var(--c-beige); }
+.discount-badge { position: absolute; top: 10px; right: 10px; background: var(--c-red); color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 5px; font-weight: 600; }
+.product-title { font-weight: 600; font-size: 1rem; margin-bottom: 5px; }
+.product-price { font-weight: 700; color: var(--c-dark-green); }
+.btn-add { background: var(--c-dark-green); color: white; border: none; border-radius: 8px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+.btn-add:hover { background: var(--c-light-green); }
+
+.cart-sidebar { width: 350px; background: white; display: flex; flex-direction: column; border-left: 1px solid #eee; z-index: 100; }
+.cart-header { padding: 25px 25px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+.cart-items { flex: 1; overflow-y: auto; padding: 20px 25px; display: flex; flex-direction: column; gap: 15px; }
+.cart-item { display: flex; gap: 15px; align-items: center; }
+.cart-item-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: var(--c-beige); }
+.cart-item-info { flex: 1; }
+.qty-control { display: flex; align-items: center; gap: 10px; background: var(--c-dark-green); color: white; border-radius: 20px; padding: 2px 10px; width: fit-content; font-size: 0.9rem;}
+.qty-control i { cursor: pointer; font-size: 0.8rem; }
+.cart-footer { padding: 20px 25px; border-top: 1px solid #eee; background: #fff; }
+
+#login-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--c-dark-green); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
+.login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; color: #333; max-width: 400px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+@media (max-width: 992px) {
+    .sidebar { position: absolute; left: -250px; height: 100%; }
+    .sidebar.show { left: 0; }
+    .cart-sidebar { position: absolute; right: -350px; height: 100%; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
+    .cart-sidebar.show { right: 0; }
+    .mobile-toggle { display: block !important; }
+}
+.mobile-toggle { display: none; background: transparent; border: none; font-size: 1.5rem; color: var(--c-dark-green); }
+
+
+/* =========================================
+   DESAIN CUSTOM INVOICE (STYLE MAC OS)
+========================================= */
+.swal-invoice-popup { border-radius: 16px !important; padding: 30px !important; width: 450px !important; }
+.custom-invoice { text-align: left; font-family: 'Poppins', sans-serif; }
+.mac-dots { display: flex; gap: 8px; margin-bottom: 25px; }
+.mac-dots .dot { width: 12px; height: 12px; border-radius: 50%; }
+.mac-dots .red { background-color: #FF5F56; }
+.mac-dots .yellow { background-color: #FFBD2E; }
+.mac-dots .green { background-color: #27C93F; }
+
+.invoice-header p { color: #888; font-size: 0.9rem; margin-bottom: 2px; }
+.invoice-header h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: #222; }
+.invoice-meta { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+
+.invoice-table-bg { background-color: #EAF4ED; border-radius: 12px; padding: 15px 20px; margin-bottom: 20px; }
+
+/* Styling Tabel Invoice & Lebar Kolom DiKunci */
+.invoice-table { width: 100%; font-size: 0.9rem; border-collapse: collapse; table-layout: fixed; }
+.invoice-table th { color: #888; font-weight: 500; padding-bottom: 10px; font-size: 0.85rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.invoice-table td { padding: 12px 0; color: #333; font-weight: 500; vertical-align: middle; }
+
+.col-item { text-align: left; width: 42%; word-wrap: break-word; padding-right: 5px; }
+.col-qty { text-align: center; width: 15%; }
+.col-price { text-align: right; width: 21%; }
+.col-total { text-align: right; width: 22%; }
+
+.invoice-total { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; margin-bottom: 30px; }
+.invoice-total span { color: #888; }
+.invoice-total strong { color: #111; font-weight: 700; font-size: 1.3rem; }
+
+/* Tombol Modal */
+.btn-print-invoice { background-color: #A3E0AA; color: #111; font-weight: 600; border: none; border-radius: 8px; padding: 15px; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+.btn-print-invoice:hover { background-color: #8DCC94; }
+.btn-close-invoice { background-color: #eee; color: #333; font-weight: 600; border: none; border-radius: 8px; padding: 15px 20px; cursor: pointer; transition: 0.2s; }
+.btn-close-invoice:hover { background-color: #ddd; }
+
+/* =========================================
+   CUSTOM ANIMATED LOADER
+========================================= */
+.custom-spinner-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6px; /* Mengecilkan ukuran loader agar pas di SweetAlert */
+  margin: 20px auto;
+}
+
+.custom-spinner-main .loaders,
+.custom-spinner-main .loadersB {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bagian Jalur/Track (Warna Beige) */
+.custom-spinner-main .loader {
+  position: absolute;
+  width: 1.15em;
+  height: 13em;
+  border-radius: 50px;
+  background: var(--c-beige);
+}
+
+.custom-spinner-main .loader:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.15em;
+  height: 5em;
+  background: var(--c-beige);
+  border-radius: 50px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: inset 5px 5px 15px rgba(0,0,0,0.05), inset -5px -5px 15px rgba(255,255,255,0.5);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to bottom, black calc(100% - 48px), transparent 100%);
+}
+
+.custom-spinner-main .loader::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 1.15em;
+  height: 4.5em;
+  background: var(--c-beige);
+  border-radius: 50px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: inset 5px 5px 15px rgba(0,0,0,0.05), inset -5px -5px 15px rgba(255,255,255,0.5);
+  -webkit-mask-image: linear-gradient(to top, black calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to top, black calc(100% - 48px), transparent 100%);
+}
+
+.custom-spinner-main .loaderA {
+  position: absolute;
+  width: 1.15em;
+  height: 13em;
+  border-radius: 50px;
+  background: transparent;
+}
+
+/* Bagian Bola Bergerak (Warna Hijau Tua) */
+.custom-spinner-main .ball0, .custom-spinner-main .ball1, .custom-spinner-main .ball2, 
+.custom-spinner-main .ball3, .custom-spinner-main .ball4, .custom-spinner-main .ball5, 
+.custom-spinner-main .ball6, .custom-spinner-main .ball7, .custom-spinner-main .ball8 {
+  width: 1.15em;
+  height: 1.15em;
+  box-shadow:
+    rgba(0, 0, 0, 0.17) 0px -10px 10px 0px inset,
+    rgba(0, 0, 0, 0.15) 0px -15px 15px 0px inset,
+    rgba(0, 0, 0, 0.1) 0px -40px 20px 0px inset,
+    rgba(0, 0, 0, 0.06) 0px 2px 1px,
+    rgba(0, 0, 0, 0.09) 0px 4px 2px,
+    rgba(0, 0, 0, 0.09) 0px 8px 4px,
+    rgba(0, 0, 0, 0.09) 0px 16px 8px,
+    rgba(0, 0, 0, 0.09) 0px 32px 16px,
+    0px -1px 15px -8px rgba(0, 0, 0, 0.09);
+  border-radius: 50%;
+  transition: transform 800ms cubic-bezier(1, -0.4, 0, 1.4);
+  background-color: var(--c-dark-green);
+  animation: 3.63s move ease-in-out infinite;
+}
+
+/* Posisi Rotasi Loader */
+.custom-spinner-main .loader:nth-child(2), .custom-spinner-main .loaderA:nth-child(2) { transform: rotate(20deg); }
+.custom-spinner-main .loader:nth-child(3), .custom-spinner-main .loaderA:nth-child(3) { transform: rotate(40deg); }
+.custom-spinner-main .loader:nth-child(4), .custom-spinner-main .loaderA:nth-child(4) { transform: rotate(60deg); }
+.custom-spinner-main .loader:nth-child(5), .custom-spinner-main .loaderA:nth-child(5) { transform: rotate(80deg); }
+.custom-spinner-main .loader:nth-child(6), .custom-spinner-main .loaderA:nth-child(6) { transform: rotate(100deg); }
+.custom-spinner-main .loader:nth-child(7), .custom-spinner-main .loaderA:nth-child(7) { transform: rotate(120deg); }
+.custom-spinner-main .loader:nth-child(8), .custom-spinner-main .loaderA:nth-child(8) { transform: rotate(140deg); }
+.custom-spinner-main .loader:nth-child(9), .custom-spinner-main .loaderA:nth-child(9) { transform: rotate(160deg); }
+
+/* Delay Bola */
+.custom-spinner-main .ball1 { animation-delay: 0.2s; }
+.custom-spinner-main .ball2 { animation-delay: 0.4s; }
+.custom-spinner-main .ball3 { animation-delay: 0.6s; }
+.custom-spinner-main .ball4 { animation-delay: 0.8s; }
+.custom-spinner-main .ball5 { animation-delay: 1s; }
+.custom-spinner-main .ball6 { animation-delay: 1.2s; }
+.custom-spinner-main .ball7 { animation-delay: 1.4s; }
+.custom-spinner-main .ball8 { animation-delay: 1.6s; }
+
+@keyframes move {
+  0% { transform: translateY(0em); }
+  50% { transform: translateY(12em); }
+  100% { transform: translateY(0em); }
+}

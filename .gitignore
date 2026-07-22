@@ -1,0 +1,9 @@
+# Abaikan file kredensial rahasia
+data/client_id.json
+
+# Abaikan file sistem bawaan OS (opsional tapi disarankan)
+.DS_Store
+Thumbs.db
+
+# Abaikan folder node_modules jika Anda menggunakan npm kelak
+node_modules/
