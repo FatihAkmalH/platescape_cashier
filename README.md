@@ -39,10 +39,11 @@ Ikuti langkah-langkah berikut:
 3. Di dalam folder `data`, **buat file baru** dengan nama `client_id.json`.
 4. Buka file `client_id.json` tersebut dan tempelkan kode di bawah ini:
 
-## json
+```json
 {
     "client_id": "FILL your client id from google cloud console here"
 }
+```
 Catatan: Ganti teks "FILL your client id..." dengan Client ID asli milik Anda yang didapatkan dari Google Cloud Console (biasanya berakhiran .apps.googleusercontent.com). File ini sudah diatur agar diabaikan oleh .gitignore sehingga aman dan tidak akan terpublikasi ke GitHub.
 
 ## Struktur Folder Seharusnya:
