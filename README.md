@@ -12,8 +12,8 @@ Platescape POS adalah aplikasi kasir (Point of Sale) berbasis Single Page Applic
 * **Cetak Struk/Invoice:** Tampilan cetak nota cantik bergaya *Mac OS window* UI.
 * **Responsif:** Nyaman digunakan di layar Desktop, Tablet, maupun HP.
 
-# jika ingin langsung mencoba bisa ke link dibawah ini
-`https://platescape-cashier.netlify.app`
+# jika bingung saat penginstallan hubungi
+fatihakmal2424@gmail.com
 
 ---
 

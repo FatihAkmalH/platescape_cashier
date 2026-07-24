@@ -125,7 +125,8 @@ window.onload = async function () {
     });
 
     // FIX BUG 1: Langsung masuk ke UI dengan data lokal IndexedDB tanpa loading Google API ulang
-    if (savedToken && loginTime && (Date.now() - parseInt(loginTime) < 86400000)) { 
+    // DIPERBAIKI (Batas 58 Menit agar tidak tertolak Google)
+    if (savedToken && loginTime && (Date.now() - parseInt(loginTime) < 3500000)) { 
         accessToken = savedToken;
         appFolderId = localStorage.getItem('pos_folderId');
         databaseFileId = localStorage.getItem('pos_dbFileId'); // PENTING: Panggil file ID agar tidak menimpa drive saat save
@@ -349,14 +350,40 @@ function updateCartQty(id, delta) {
     if(item) { item.qty += delta; if(item.qty <= 0) cart = cart.filter(i => i.id != id); updateCartUI(); }
 }
 
+// Fungsi Baru: Untuk mengubah Qty langsung dari ketikan Keyboard
+function setCartQty(id, value) {
+    let newQty = parseInt(value);
+    
+    // Jika input kosong, huruf, atau angka 0 ke bawah, hapus item dari keranjang
+    if (isNaN(newQty) || newQty <= 0) {
+        cart = cart.filter(i => i.id != id);
+    } else {
+        const item = cart.find(i => i.id == id);
+        if(item) item.qty = newQty;
+    }
+    
+    updateCartUI(); // Hitung dan render ulang keranjang
+}
+
 function updateCartUI() {
     const container = document.getElementById('cart-items-container'); 
     const totalEl = document.getElementById('cart-total-price');
+    const mobileTotalEl = document.getElementById('mobile-total-price'); // <-- Elemen Mobile
+    const mobileBadge = document.getElementById('mobile-cart-badge');       // <-- Badge Mobile
     const emptyMsg = document.getElementById('empty-cart-msg');
     
+    // Hitung total qty barang di keranjang
+    let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+    if(mobileBadge) mobileBadge.innerText = totalQty;
+
     if(cart.length === 0) {
-        emptyMsg.style.display = 'block'; container.innerHTML = ''; totalEl.innerText = 'Rp 0'; return;
+        emptyMsg.style.display = 'block'; 
+        container.innerHTML = ''; 
+        totalEl.innerText = 'Rp 0'; 
+        if(mobileTotalEl) mobileTotalEl.innerText = 'Rp 0';
+        return;
     }
+    
     emptyMsg.style.display = 'none';
     let total = 0;
     container.innerHTML = cart.map(item => {
@@ -370,12 +397,14 @@ function updateCartUI() {
             </div>
             <div class="qty-control">
                 <i class="fa-solid fa-minus" onclick="updateCartQty(${item.id}, -1)"></i>
-                <span class="mx-1">${item.qty}</span>
+                <input type="number" value="${item.qty}" onchange="setCartQty(${item.id}, this.value)" onfocus="this.select()">
                 <i class="fa-solid fa-plus" onclick="updateCartQty(${item.id}, 1)"></i>
             </div>
         </div>`;
     }).join('');
+    
     totalEl.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    if(mobileTotalEl) mobileTotalEl.innerText = `Rp ${total.toLocaleString('id-ID')}`; // <-- Update teks mobile
 }
 
 async function checkout() {
@@ -400,7 +429,14 @@ async function checkout() {
             const metadata = { name: `Invoice_${custName.replace(/\s+/g, '_')}_${transactionData.id}.json`, mimeType: 'application/json', parents: [appFolderId] };
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', file);
-            await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` }, body: form });
+            
+            const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` }, body: form });
+            
+            // PENGAMANAN BARU: Menangkap pesan asli dari Google jika tertolak
+            if (!res.ok) {
+                if (res.status === 401) throw new Error("Sesi Login Google Anda sudah habis (Lewat 1 Jam). Silakan Logout dan Login kembali.");
+                throw new Error(`Google Drive Error Code: ${res.status}`);
+            }
             
             const products = await getAllProducts();
             for (let item of cart) {
@@ -413,7 +449,13 @@ async function checkout() {
             triggerSyncWarning(); 
             
             finishCheckout(transactionData);
-        } catch(e) { Swal.fire('Info', 'Gagal menyimpan ke Google Drive.', 'info'); }
+        } catch(e) { 
+            console.error("Checkout Failed:", e);
+            // Menampilkan alasan detail kenapa gagal
+            Swal.fire('Transaksi Gagal', e.message, 'error'); 
+        }
+    } else {
+        Swal.fire('Oops', 'Akses ke Google Drive belum siap. Coba refresh halaman.', 'warning');
     }
 }
 
@@ -506,7 +548,7 @@ async function openProductModal(id = null) {
             await updateSingleProductInIDB(prodData);
             triggerSyncWarning(); 
             renderCrudTable();
-            Swal.fire('Tersimpan di LocaleStorage terlebih dahulu, dan akan tersinkron ke drive setiap 2 menit', 'Sistem akan mensinkronisasi ke Drive segera.', 'success');
+            Swal.fire('Tersimpan di IDB', 'Sistem akan mensinkronisasi ke Drive segera.', 'success');
         }
     });
 }
@@ -522,29 +564,156 @@ function deleteProduct(id) {
 }
 
 /* =========================================================
-   ORDER HISTORY & PRINT LOGIC
+   ORDER HISTORY, FILTER, & PAGINATION LOGIC
 ========================================================= */
+let currentHistoryPage = 1;
+const historyRowsPerPage = 15;
+let filteredHistoryData = [];
+
 async function renderHistory() {
     const tbody = document.getElementById('history-table-body');
-    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat riwayat...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Memuat riwayat pesanan dari Google Drive...</td></tr>';
+    
     try {
-        const query = `name contains 'Invoice_' and '${appFolderId}' in parents and trashed=false`;
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc`, { headers: { 'Authorization': `Bearer ${accessToken}` }});
+        const query = `name contains 'Invoice' and '${appFolderId}' in parents and trashed=false`;
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc&t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${accessToken}` }});
+        
+        if(!res.ok) throw new Error("Gagal baca Drive");
         const data = await res.json();
         
-        if(!data.files || data.files.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="text-center">Belum ada transaksi</td></tr>'; return; }
+        if(!data.files || data.files.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Belum ada transaksi</td></tr>'; 
+            document.getElementById('history-pagination-info').innerText = 'Menampilkan 0 dari 0 data';
+            document.getElementById('history-pagination-buttons').innerHTML = '';
+            window.loadedInvoices = [];
+            filteredHistoryData = [];
+            return; 
+        }
         
-        tbody.innerHTML = data.files.map(f => {
-            const date = new Date(f.createdTime).toLocaleString('id-ID');
-            return `<tr>
-                <td>${date}</td><td>${f.name}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="viewInvoice('${f.id}')"><i class="fa-solid fa-eye"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteInvoice('${f.id}')"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>`;
-        }).join('');
-    } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="text-danger">Gagal load Drive</td></tr>'; }
+        // Ambil isi detail file invoice secara paralel
+        const filePromises = data.files.map(async (f) => {
+            const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&t=${Date.now()}`, { headers: { 'Authorization': `Bearer ${accessToken}` }});
+            return { fileId: f.id, json: await fileRes.json(), createdTime: f.createdTime };
+        });
+
+        window.loadedInvoices = await Promise.all(filePromises);
+        filteredHistoryData = [...window.loadedInvoices]; // Salin ke data aktif filter
+        
+        currentHistoryPage = 1; // Reset ke halaman 1
+        renderHistoryTable();
+    } catch(e) { 
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Gagal memuat riwayat dari Google Drive</td></tr>'; 
+    }
+}
+
+// Fungsi Utama Render Tabel Berdasarkan Halaman & Filter
+function renderHistoryTable() {
+    const tbody = document.getElementById('history-table-body');
+    const infoEl = document.getElementById('history-pagination-info');
+    const paginationEl = document.getElementById('history-pagination-buttons');
+
+    if (filteredHistoryData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Tidak ada data yang cocok dengan filter pencarian</td></tr>';
+        infoEl.innerText = 'Menampilkan 0 dari 0 data';
+        paginationEl.innerHTML = '';
+        return;
+    }
+
+    // Hitung Pagination
+    const totalData = filteredHistoryData.length;
+    const totalPages = Math.ceil(totalData / historyRowsPerPage);
+    if (currentHistoryPage > totalPages) currentHistoryPage = totalPages;
+
+    const startIndex = (currentHistoryPage - 1) * historyRowsPerPage;
+    const endIndex = startIndex + historyRowsPerPage;
+    const paginatedData = filteredHistoryData.slice(startIndex, endIndex);
+
+    // Render Baris Tabel
+    tbody.innerHTML = paginatedData.map(({ fileId, json }) => {
+        const dateStr = new Date(json.date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+        const itemsSummary = json.items.map(i => `${i.name} (${i.qty}x)`).join(', ');
+        
+        return `<tr>
+            <td>${dateStr}</td>
+            <td class="fw-semibold text-secondary">#${json.id.replace('ORD-', '')}</td>
+            <td class="fw-bold">${json.customer}</td>
+            <td><span class="badge bg-light text-dark border">${json.table}</span></td>
+            <td><small class="text-muted">${itemsSummary}</small></td>
+            <td class="fw-bold text-success">Rp ${json.total.toLocaleString('id-ID')}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="viewInvoice('${fileId}')" title="Lihat Invoice"><i class="fa-solid fa-eye"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteInvoice('${fileId}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Info Text Pagination
+    infoEl.innerText = `Menampilkan ${startIndex + 1} - ${Math.min(endIndex, totalData)} dari ${totalData} data`;
+
+    // Render Tombol Pagination Bootstrap
+    let paginationHtml = '';
+    // Tombol Previous
+    paginationHtml += `<li class="page-item ${currentHistoryPage === 1 ? 'disabled' : ''}">
+        <button class="page-link" onclick="changeHistoryPage(${currentHistoryPage - 1})">Prev</button>
+    </li>`;
+
+    // Nomor Halaman (Maksimal tampilkan beberapa atau sederhana)
+    for (let i = 1; i <= totalPages; i++) {
+        paginationHtml += `<li class="page-item ${currentHistoryPage === i ? 'active' : ''}">
+            <button class="page-link" onclick="changeHistoryPage(${i})">${i}</button>
+        </li>`;
+    }
+
+    // Tombol Next
+    paginationHtml += `<li class="page-item ${currentHistoryPage === totalPages ? 'disabled' : ''}">
+        <button class="page-link" onclick="changeHistoryPage(${currentHistoryPage + 1})">Next</button>
+    </li>`;
+
+    paginationEl.innerHTML = paginationHtml;
+}
+
+// Navigasi Halaman
+function changeHistoryPage(page) {
+    if (page < 1) return;
+    const totalPages = Math.ceil(filteredHistoryData.length / historyRowsPerPage);
+    if (page > totalPages) return;
+    currentHistoryPage = page;
+    renderHistoryTable();
+}
+
+// Filter Pencarian (Nama / ID) dan Tanggal
+function filterHistoryData() {
+    const searchText = document.getElementById('history-search').value.toLowerCase();
+    const dateFilterVal = document.getElementById('history-date-filter').value; // Format: YYYY-MM-DD
+
+    filteredHistoryData = window.loadedInvoices.filter(({ json }) => {
+        const orderId = json.id.toLowerCase();
+        const customerName = json.customer.toLowerCase();
+        
+        // Cek kecocokan Search (ID atau Nama Pemesan)
+        const matchesSearch = orderId.includes(searchText) || customerName.includes(searchText);
+
+        // Cek kecocokan Tanggal (Ambil tanggal YYYY-MM-DD dari json.date)
+        let matchesDate = true;
+        if (dateFilterVal) {
+            const orderDateStr = new Date(json.date).toISOString().slice(0, 10);
+            matchesDate = (orderDateStr === dateFilterVal);
+        }
+
+        return matchesSearch && matchesDate;
+    });
+
+    currentHistoryPage = 1; // Kembalikan ke halaman pertama setiap kali memfilter
+    renderHistoryTable();
+}
+
+// Reset Filter
+function resetHistoryFilter() {
+    document.getElementById('history-search').value = '';
+    document.getElementById('history-date-filter').value = '';
+    filteredHistoryData = [...(window.loadedInvoices || [])];
+    currentHistoryPage = 1;
+    renderHistoryTable();
 }
 
 function deleteInvoice(fileId) {
@@ -686,6 +855,43 @@ function deleteSoldProduct(id) {
                 Swal.fire('Di-reset!', 'Data penjualan dikembalikan ke 0.', 'success');
             }
         }
+    });
+}
+
+// FUNGSI EXPORT KE CSV BERDASARKAN FILTER AKTIF
+function exportHistoryToCSV() {
+    if (!filteredHistoryData || filteredHistoryData.length === 0) {
+        return Swal.fire('Kosong', 'Tidak ada data riwayat yang tersedia untuk diexport.', 'warning');
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,ID Pesanan,Tanggal,Nama Pemesan,Meja/Tipe,Catatan,Detail Item,Total Harga (Rp)\r\n";
+
+    filteredHistoryData.forEach(({ json }) => {
+        let date = new Date(json.date).toLocaleString('id-ID');
+        let customer = `"${json.customer}"`;
+        let table = `"${json.table}"`;
+        let notes = `"${(json.notes || '-').replace(/"/g, '""')}"`;
+        let items = `"${json.items.map(i => `${i.name} (${i.qty}x)`).join('; ')}"`;
+        let total = json.total;
+
+        let row = [json.id, date, customer, table, notes, items, total].join(",");
+        csvContent += row + "\r\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Laporan_Pesanan_Platescape_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil Export!',
+        text: 'File CSV laporan berhasil diunduh.',
+        timer: 2000,
+        showConfirmButton: false
     });
 }
 

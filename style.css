@@ -25,8 +25,25 @@ body { font-family: 'Poppins', sans-serif; background-color: var(--bg-main); hei
 
 .main-content { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow: hidden; }
 .topbar { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; background: white; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-.search-bar { background: #f0f2f5; border-radius: 20px; padding: 10px 20px; width: 400px; display: flex; align-items: center; gap: 10px; }
-.search-bar input { border: none; background: transparent; outline: none; width: 100%; }
+/* Update Search Bar agar elastis dan rapi */
+.search-bar { 
+    background: #f0f2f5; 
+    border-radius: 20px; 
+    padding: 12px 20px; 
+    width: 100%; 
+    max-width: 400px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+.search-bar:focus-within {
+    background: white;
+    border-color: var(--c-light-green);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.search-bar input { border: none; background: transparent; outline: none; width: 100%; font-size: 0.95rem; }
 
 .content-scroll { flex: 1; overflow-y: auto; padding: 30px; padding-bottom: 100px;}
 
@@ -40,8 +57,23 @@ body { font-family: 'Poppins', sans-serif; background-color: var(--bg-main); hei
 .category-card.active i { color: white; }
 
 .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.product-card { background: white; border-radius: 15px; padding: 15px; position: relative; border: 1px solid #f0f0f0; transition: transform 0.2s; display: flex; flex-direction: column;}
-.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+/* Update Kartu Produk agar lebih elegan */
+.product-card { 
+    background: white; 
+    border-radius: 15px; 
+    padding: 15px; 
+    position: relative; 
+    border: 1px solid #eee; 
+    transition: all 0.3s ease; 
+    display: flex; 
+    flex-direction: column;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+.product-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+    border-color: var(--c-light-green);
+}
 .product-img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 15px; background: var(--c-beige); }
 .discount-badge { position: absolute; top: 10px; right: 10px; background: var(--c-red); color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 5px; font-weight: 600; }
 .product-title { font-weight: 600; font-size: 1rem; margin-bottom: 5px; }
@@ -220,4 +252,327 @@ body { font-family: 'Poppins', sans-serif; background-color: var(--bg-main); hei
   0% { transform: translateY(0em); }
   50% { transform: translateY(12em); }
   100% { transform: translateY(0em); }
+}
+
+/* =========================================
+   CUSTOM INPUT QTY KERANJANG
+========================================= */
+.qty-control input {
+    width: 35px;
+    background: transparent;
+    border: none;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.95rem;
+    -moz-appearance: textfield; /* Khusus Firefox lama */
+    appearance: textfield;      /* Standar kompatibilitas (menghilangkan error linter) */
+}
+
+/* Menghilangkan panah angka di Chrome/Safari/Edge */
+.qty-control input::-webkit-outer-spin-button,
+.qty-control input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Garis bawah saat angka sedang diketik */
+.qty-control input:focus {
+    outline: none;
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    border-radius: 0;
+}
+
+/* =========================================================
+   UIVERSE: CUSTOM SEARCH BAR
+========================================================= */
+.custom-search-form button { border: none; background: none; color: #8b8ba7; }
+.custom-search-form {
+  --timing: 0.3s;
+  --width-of-input: 250px;
+  --height-of-input: 40px;
+  --border-height: 2px;
+  --input-bg: #fff;
+  --border-color: var(--c-dark-green);
+  --border-radius: 30px;
+  --after-border-radius: 1px;
+  position: relative;
+  width: var(--width-of-input);
+  height: var(--height-of-input);
+  display: flex;
+  align-items: center;
+  padding-inline: 0.8em;
+  border-radius: var(--border-radius);
+  transition: border-radius 0.5s ease;
+  background: var(--input-bg, #fff);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.custom-search-form .input { font-size: 0.9rem; background-color: transparent; width: 100%; height: 100%; padding-inline: 0.5em; padding-block: 0.7em; border: none; color:#333; }
+.custom-search-form .input:focus { outline: none; }
+.custom-search-form:before { content: ""; position: absolute; background: var(--border-color); transform: scaleX(0); transform-origin: center; width: 100%; height: var(--border-height); left: 0; bottom: 0; border-radius: 1px; transition: transform var(--timing) ease; }
+.custom-search-form:focus-within { border-radius: var(--after-border-radius); }
+.custom-search-form:focus-within:before { transform: scale(1); }
+.custom-search-form .reset { border: none; background: none; opacity: 0; visibility: hidden; cursor: pointer; }
+.custom-search-form .input:not(:placeholder-shown) ~ .reset { opacity: 1; visibility: visible; }
+.custom-search-form svg { width: 17px; margin-top: 3px; }
+
+/* =========================================================
+   UIVERSE: USER PROFILE DROPDOWN
+========================================================= */
+.user-menu-template {
+  --fill: #fff;
+  --fill-hover: #f1f1f1;
+  --fill-active: #e2e2e2;
+  --txt: #333;
+  --br: 0.625rem;
+  --gap: 0.25rem;
+  --popup-main-h: auto;
+  display: flex; box-sizing: border-box; font-size: 0.95rem; color: var(--txt);
+  z-index: 100;
+}
+.um-button {
+  position: relative; display: inline-block; appearance: none; outline: 0; border: 0; cursor: pointer; text-decoration: none; font-size: inherit; color: inherit; white-space: nowrap;
+  padding: 8px 15px; text-align: left; background-color: var(--fill);
+  border-radius: var(--br) calc(var(--br) / 2) calc(var(--br) / 2) var(--br);
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.um-button:hover { background-color: var(--fill-hover); }
+.um-button.quit:hover { background-color: #ffe5e5; color: #962434;}
+.um-button:focus, .um-button:active { background-color: var(--fill-active); }
+.um-hr { margin: 0.5rem 0.8rem; border: 1px dashed #ccc; }
+.user-menu-template .popup { position: relative; }
+.user-menu-template .popup-header { display: flex; flex-direction: row; align-items: center; gap: 5px; }
+.user-menu-template .popup-main {
+  position: absolute; top: 100%; right: 0; opacity: 0; margin-top: var(--gap); border-radius: var(--br); padding: 0 calc(var(--gap) * 1.5);
+  background-color: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border: 1px solid #eee;
+  transition: 0.3s; overflow: hidden; height: 0; visibility: hidden; pointer-events: none;
+}
+/* Trigger Dropdown on click/focus */
+.user-menu-template .popup:focus .popup-main, 
+.user-menu-template .popup:focus-within .popup-main { 
+    margin-top: 0.5rem; opacity: 1; height: auto; visibility: visible; pointer-events: auto; 
+}
+.user-menu-template .list-box { scrollbar-width: none; overflow: auto; display: flex; flex-direction: column; padding: 10px 0; margin:0; list-style: none; }
+.user-menu-template .list-box .um-button { box-shadow: none; border-radius: 5px; margin-bottom: 2px; }
+
+/* =========================================================
+   UIVERSE: CUSTOM LOGOUT BUTTON (FIX ERROR GETAR & MERAH)
+========================================================= */
+.custom-logout-btn {
+  font-family: inherit; 
+  font-size: 15px; 
+  background: #dc3545; /* Warna Merah */
+  color: white; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  cursor: pointer; 
+  border: none; 
+  border-radius: 12px; 
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2); /* Bayangan merah halus */
+  height: 40px;
+  width: 110px; /* FIXED WIDTH: Mencegah tombol bergetar atau menimpa ID Admin */
+  transition: all 0.3s ease-in-out;
+}
+.custom-logout-btn span { 
+  display: block; 
+  margin-left: 0.5em; 
+  transition: all 0.3s ease-in-out; 
+  white-space: nowrap;
+}
+.custom-logout-btn svg { 
+  display: block; 
+  transition: transform 0.3s ease-in-out; 
+}
+.custom-logout-btn:hover { 
+  background: #b02a37; /* Merah gelap saat di-hover */
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+.custom-logout-btn:hover svg { 
+  transform: translateX(18px) scale(1.15); /* Ikon meluncur ke tengah */
+}
+.custom-logout-btn:hover span { 
+  opacity: 0; 
+  transform: translateX(20px); /* Teks meluncur keluar */
+  pointer-events: none;
+}
+.custom-logout-btn:active { 
+  transform: scale(0.95); 
+}
+
+/* =========================================================
+   UIVERSE: SYNC (BOOKMARK) BUTTON 
+========================================================= */
+.bookmarkBtn {
+  width: 135px; height: 40px; border-radius: 40px; border: 1px solid rgba(0,0,0,0.1); background-color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; transition-duration: 0.3s; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 0;
+}
+.bookmarkBtn .IconContainer {
+  width: 30px; height: 30px; border-radius: 50px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; z-index: 2; transition-duration: 0.3s; margin-left: 5px;
+}
+/* Logika Warna Terhubung dengan app.js (Success = Hijau, Warning = Kuning) */
+.bookmarkBtn.btn-outline-success .IconContainer { background: linear-gradient(to bottom, #73976A, #677E61); }
+.bookmarkBtn.btn-outline-warning .IconContainer { background: linear-gradient(to bottom, #ffcd39, #ff9800); }
+.bookmarkBtn.btn-outline-warning .text { color: #d32f2f; }
+
+.bookmarkBtn .icon { border-radius: 1px; }
+.bookmarkBtn .text { height: 100%; width: 90px; display: flex; align-items: center; justify-content: center; color: #333; z-index: 1; transition-duration: 0.3s; font-size: 0.9em; font-weight: 600; margin:0;}
+.bookmarkBtn:hover .IconContainer { width: 125px; transition-duration: 0.3s; }
+.bookmarkBtn:hover .text { transform: translate(10px); width: 0; font-size: 0; transition-duration: 0.3s; }
+.bookmarkBtn:active { transform: scale(0.95); transition-duration: 0.3s; }
+
+/* =========================================================
+   RESPONSIVE MOBILE CART & STICKY BOTTOM BAR
+========================================================= */
+
+/* Tombol Sticky di bawah khusus Mobile (Default disembunyikan di Desktop) */
+.mobile-cart-sticky-bar {
+    display: none;
+}
+
+@media (max-width: 992px) {
+    /* Sembunyikan keranjang sidebar gaya desktop lama di mobile */
+    .cart-sidebar {
+        position: fixed !important;
+        top: 0;
+        right: -100%; /* Sembunyikan di luar layar kanan */
+        width: 100% !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        transition: right 0.3s ease-in-out;
+        box-shadow: none;
+    }
+
+    /* Saat kelas .show aktif di mobile, geser ke layar penuh */
+    .cart-sidebar.show {
+        right: 0 !important;
+    }
+
+    /* Tampilkan Sticky Bottom Bar di HP */
+    .mobile-cart-sticky-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 12px 20px;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    /* Berikan jarak bawah pada list menu agar tidak tertutup sticky bar */
+    .content-scroll {
+        padding-bottom: 90px !important;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE MOBILE FIX (TOPBAR & SIDEBAR)
+========================================================= */
+@media (max-width: 992px) {
+    /* 1. Membuat Search Bar menjadi elastis dan proporsional */
+    .custom-search-form {
+        --width-of-input: 100%;
+        flex-grow: 1;
+        min-width: 0; /* Mencegah input meluap dari container */
+    }
+
+    /* 2. Mengubah Tombol Sync menjadi Ikon Bulat (Menyembunyikan Teks) */
+    .bookmarkBtn {
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+    }
+    .bookmarkBtn .text {
+        display: none !important; /* Sembunyikan tulisan "Tersinkron" */
+    }
+    .bookmarkBtn .IconContainer {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+    }
+    .bookmarkBtn:hover .IconContainer {
+        width: 100% !important;
+    }
+
+    /* 3. Menyesuaikan padding Topbar agar tidak terlalu sesak */
+    .topbar {
+        padding: 15px 20px;
+        gap: 10px;
+    }
+    .topbar .gap-3 {
+        gap: 10px !important; /* Perkecil jarak antar ikon di HP */
+    }
+}
+
+/* =========================================================
+   CUSTOM CLOSE BUTTON SIDEBAR MOBILE
+========================================================= */
+.custom-close-sidebar {
+    font-size: 1.8rem; /* Diperbesar agar seimbang dengan logo Platescape */
+    color: #ffffff;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: -5px; /* Menyesuaikan tinggi agar sejajar sempurna dengan logo */
+}
+
+.custom-close-sidebar:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+/* =========================================================
+   DESAIN LOGO PLATESCAPE (KOTAK KREM)
+========================================================= */
+.brand-icon-box {
+    background-color: #F1DEC4; /* Warna kotak krem (Beige) */
+    color: #677E61;            /* Warna ikon hijau gelap */
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;       /* Membuat sudut melengkung */
+    font-size: 1.1rem;
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+
+/* =========================================================
+   FIX SCROLL TERTUTUP STICKY BAR & KERANJANG (MOBILE)
+========================================================= */
+@media (max-width: 992px) {
+    /* 1. Memberikan ruang kosong ekstra di bawah daftar produk */
+    #product-list {
+        padding-bottom: 100px !important;
+    }
+
+    /* 2. Memperbaiki tinggi keranjang agar akurat dengan layar HP (menggunakan dvh) */
+    .cart-sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100dvh !important; /* dvh = dynamic viewport height */
+    }
+
+    /* 3. Memberikan ruang kosong ekstra di bawah list item dalam keranjang */
+    #cart-items-container {
+        padding-bottom: 80px !important;
+    }
 }
